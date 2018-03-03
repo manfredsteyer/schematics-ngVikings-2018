@@ -1,0 +1,46 @@
+{
+    "$schema": "http://json-schema.org/schema",
+    "id": "SchemanticsForMenu",
+    "title": "Menu Schema",
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "default": "name"
+      },
+      "path": {
+        "type": "string",
+        "default": "app"
+      },
+      "appRoot": {
+        "type": "string"
+      },
+      "sourceDir": {
+        "type": "string",
+        "default": "src"
+      },
+
+
+      "module":  {
+        "type": "string",
+        "description": "The declaring module.",
+        "alias": "m"
+      },
+      "export": {
+        "type": "boolean",
+        "default": false,
+        "description": "Export component from module?"
+      },
+
+
+      "menuService": {
+        "type": "boolean",
+        "default": false,
+        "description": "Flag to indicate whether an menu service should be generated.",
+        "alias": "ms"
+      }
+
+      
+    }
+  }
+  
