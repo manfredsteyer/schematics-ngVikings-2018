@@ -1,11 +1,17 @@
-import { Tree, SchematicsException, Rule } from "@angular-devkit/schematics";
+import { Tree, SchematicsException, Rule, DirEntry } from "@angular-devkit/schematics";
 import { ModuleOptions, buildRelativePath } from "../schematics-angular-utils/find-module";
 import * as ts from 'typescript';
 import { insertImport } from "../schematics-angular-utils/route-utils";
 import { getSourceNodes } from "../schematics-angular-utils/ast-utils";
 import { Change, InsertChange, NoopChange } from "../schematics-angular-utils/change";
 import { findFile, constructDestinationPath } from "./find-file";
-import { join, normalize, dasherize, classify, camelize } from "@angular-devkit/core";
+import { strings, normalize, join } from '@angular-devkit/core';
+import { MenuOptions } from "../menu/schema";
+
+
+const classify = strings.classify;
+const dasherize = strings.dasherize;
+const camelize = strings.camelize;
 
 interface AddInjectionContext {
     appComponentFileName: string;       // e. g. /src/app/app.component.ts
@@ -13,10 +19,23 @@ interface AddInjectionContext {
     serviceName: string;                // e. g. SideMenuService
 }
 
-function createAddInjectionContext(options: ModuleOptions): AddInjectionContext {
+function findFileByName(file: string, path: string, host: Tree): string {
     
-    let appComponentFileName = '/' +  options.sourceDir + '/' + options.appRoot + '/app.component.ts';
+    let dir: DirEntry | null = host.getDir(path);
 
+    while(dir) {
+        let appComponentFileName = dir.path + '/' + file;
+        if (host.exists(appComponentFileName)) {
+            return appComponentFileName;
+        }
+        dir = dir.parent;
+    }
+    throw new SchematicsException(`File ${file} not found in ${path} or one of its anchestors`);
+}
+
+function createAddInjectionContext(options: ModuleOptions, host: Tree): AddInjectionContext {
+    
+    let appComponentFileName = findFileByName('app.component.ts', options.path || '/', host);
     let destinationPath = constructDestinationPath(options);
     let serviceName = classify(`${options.name}Service`);
     let serviceFileName = join(normalize(destinationPath), `${dasherize(options.name)}.service`);
@@ -30,9 +49,11 @@ function createAddInjectionContext(options: ModuleOptions): AddInjectionContext 
 }
 
 export function injectServiceIntoAppComponent(options: ModuleOptions): Rule {
+    console.log('injectServiceIntoAppComponent');
     return (host: Tree) => {
 
-        let context = createAddInjectionContext(options);
+        let context = createAddInjectionContext(options, host);
+
         let changes = buildInjectionChanges(context, host, options);
         
         const declarationRecorder = host.beginUpdate(context.appComponentFileName);

@@ -11,7 +11,9 @@
 import { Rule, Tree, SchematicsException } from '@angular-devkit/schematics';
 import { AddToModuleContext } from './add-to-module-context';
 import * as ts from 'typescript';
-import { dasherize, classify } from '@angular-devkit/core';
+import { strings } from '@angular-devkit/core';
+
+const { dasherize, classify } = strings;
 
 // Referencing forked and copied private APIs 
 import { ModuleOptions, buildRelativePath } from '../schematics-angular-utils/find-module';
@@ -41,12 +43,12 @@ function createAddToModuleContext(host: Tree, options: ModuleOptions): AddToModu
   const text = host.read(options.module);
 
   if (text === null) {
-    throw new SchematicsException(`File ${options.module} does not exist.`);
+    throw new SchematicsException(`File ${options.module} does not exist!`);
   }
   const sourceText = text.toString('utf-8');
   result.source = ts.createSourceFile(options.module, sourceText, ts.ScriptTarget.Latest, true);
 
-  const componentPath = `/${options.sourceDir}/${options.path}/`
+  const componentPath = `${options.path}/`
       + stringUtils.dasherize(options.name) + '/'
       + stringUtils.dasherize(options.name)
       + '.component';

@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { Path, join, normalize, relative, dasherize } from '@angular-devkit/core';
+import { Path, join, normalize, relative, strings } from '@angular-devkit/core';
 import { DirEntry, Tree } from '@angular-devkit/schematics';
 
 
@@ -13,10 +13,8 @@ export interface ModuleOptions {
   module?: string;
   name: string;
   flat?: boolean;
-  sourceDir?: string;
   path?: string;
   skipImport?: boolean;
-  appRoot?: string;
 }
 
 
@@ -29,13 +27,13 @@ export function findModuleFromOptions(host: Tree, options: ModuleOptions): Path 
   }
 
   if (!options.module) {
-    const pathToCheck = (options.sourceDir || '') + '/' + (options.path || '')
-                      + (options.flat ? '' : '/' + dasherize(options.name));
+    const pathToCheck = (options.path || '')
+                      + (options.flat ? '' : '/' + strings.dasherize(options.name));
 
     return normalize(findModule(host, pathToCheck));
   } else {
     const modulePath = normalize(
-      '/' + options.sourceDir + '/' + (options.appRoot || options.path) + '/' + options.module);
+      '/' + (options.path) + '/' + options.module);
     const moduleBaseName = normalize(modulePath).split('/').pop();
 
     if (host.exists(modulePath)) {
@@ -62,6 +60,8 @@ export function findModule(host: Tree, generateDir: string): Path {
   const routingModuleRe = /-routing\.module\.ts/;
 
   while (dir) {
+    console.log('dir ', dir.path);
+
     const matches = dir.subfiles.filter(p => moduleRe.test(p) && !routingModuleRe.test(p));
 
     if (matches.length == 1) {
@@ -74,8 +74,8 @@ export function findModule(host: Tree, generateDir: string): Path {
     dir = dir.parent;
   }
 
-  throw new Error('Could not find an NgModule for the new component. Use the skip-import '
-    + 'option to skip importing components in NgModule.');
+  throw new Error('Could not find an NgModule. Use the skip-import '
+    + 'option to skip importing in NgModule.');
 }
 
 /**

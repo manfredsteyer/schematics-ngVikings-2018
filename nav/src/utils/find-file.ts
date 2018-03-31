@@ -1,11 +1,13 @@
 import { Tree, DirEntry } from "@angular-devkit/schematics";
 import { ModuleOptions } from "../schematics-angular-utils/find-module";
-import { dasherize, join, Path } from "@angular-devkit/core";
+import { strings, join, Path } from "@angular-devkit/core";
+
+const dasherize = strings.dasherize;
 
 export function constructDestinationPath(options: ModuleOptions): string {
     
-    return '/' + (options.sourceDir? options.sourceDir + '/' : '') + (options.path || '')
-                + (options.flat ? '' : '/' + dasherize(options.name));
+    return (options.path || '') + (options.flat ? '' : '/' + strings.dasherize(options.name));
+
 }
 
 export function findFile(fileName: string, host: Tree, options: ModuleOptions): Path | null {

@@ -1,13 +1,14 @@
 import { chain, mergeWith } from '@angular-devkit/schematics';
-import { dasherize, classify } from '@angular-devkit/core';
 import { MenuOptions } from './schema';
 import { apply, filter, move, Rule, template, url, branchAndMerge, Tree, SchematicContext } from '@angular-devkit/schematics';
-import { normalize } from '@angular-devkit/core';
+import { strings } from '@angular-devkit/core';
 import { addDeclarationToNgModule } from '../utils/ng-module-utils';
 import { findModuleFromOptions } from '../schematics-angular-utils/find-module';
 import { injectServiceIntoAppComponent } from '../utils/add-injection';
 
-const stringUtils = { dasherize, classify };
+import { getWorkspace } from '../schematics-angular-utils/config';
+import { parseName } from '../utils/parse-name';
+
 
 function filterTemplates(options: MenuOptions): Rule {
   if (!options.menuService) {
@@ -20,16 +21,33 @@ export default function (options: MenuOptions): Rule {
 
     return (host: Tree, context: SchematicContext) => {
 
-      options.path = options.path ? normalize(options.path) : options.path;
-      options.module = options.module || findModuleFromOptions(host, options) || '';
+      console.log('options', options);
+
+      const workspace = getWorkspace(host);
+      if (!options.project) {
+        options.project = Object.keys(workspace.projects)[0];
+      }
+      const project = workspace.projects[options.project];
+
+      if (options.path === undefined) {
+        options.path = `/${project.root}/src/app`;
+      }
+
+      options.module = findModuleFromOptions(host, options);
+
+      const parsedPath = parseName(options.path, options.name);
+      options.name = parsedPath.name;
+      options.path = parsedPath.path;
+
+      console.log('options', options);
 
       const templateSource = apply(url('./files'), [
         filterTemplates(options),
         template({
-          ...stringUtils,
+          ...strings,
           ...options
         }),
-        move(options.sourceDir)
+        move(parsedPath.path)
       ]);
 
       const rule = chain([
