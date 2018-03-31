@@ -6,7 +6,11 @@ import { SideMenuComponent } from './side-menu/side-menu.component';
   imports: [
     CommonModule
   ],
-  declarations: [SideMenuComponent],
-  exports: [SideMenuComponent]
+  declarations: [
+    SideMenuComponent
+  ],
+  exports: [
+    SideMenuComponent
+  ]
 })
 export class CoreModule { }

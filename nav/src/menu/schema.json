@@ -32,7 +32,6 @@
         "description": "Export component from module?"
       },
 
-
       "menuService": {
         "type": "boolean",
         "default": false,
