@@ -1,0 +1,3 @@
+class Demo {
+    constructor(otherDemo) { }
+}
